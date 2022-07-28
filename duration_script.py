@@ -4,8 +4,6 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
-import xgboost as xgb
-
 
 def load_data(path):
     data = pd.read_csv(path)
@@ -41,14 +39,12 @@ def train_model(X_train, X_test, y_train, y_test):
 
     clf_gini = DecisionTreeClassifier(**best_params)
     clf_gini.fit(X_train, y_train)
-    clf_gini
     return clf_gini
 
 
-def estimate_quality(model, X_val, y_val):
-    validation = xgb.DMatrix(X_val, label=y_val)
-    y_pred = model.predict(validation)
-    return mean_squared_error(y_pred, y_val, squared=False)
+def estimate_quality(model, X_test, y_test):
+    y_pred_gini = model.predict(X_test)
+    return mean_squared_error(y_test, y_pred_gini, squared=False)
 
 
 if __name__ == '__main__':
@@ -58,7 +54,7 @@ if __name__ == '__main__':
     X_train, X_val, y_train, y_val = generate_datasets(df)
     print(f"datsets are generate")
 
-    model = train_model(X_train, y_train, X_val, y_val)
+    model = train_model(X_train, X_val, y_train, y_val)
     print(f"model trained")
 
     rmse = estimate_quality(model, X_val, y_val)

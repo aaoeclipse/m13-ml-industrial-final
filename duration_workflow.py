@@ -34,7 +34,7 @@ def generate_datasets(df):
 
 
 @task
-def train_model(X_train, y_train):
+def train_model(X_train, X_test, y_train, y_test):
     best_params = {
         "criterion": 'gini',
         "max_depth": None,
@@ -51,15 +51,13 @@ def train_model(X_train, y_train):
 
     clf_gini = DecisionTreeClassifier(**best_params)
     clf_gini.fit(X_train, y_train)
-    clf_gini
     return clf_gini
 
 
 @task
-def estimate_quality(model, X_val, y_val):
-    validation = xgb.DMatrix(X_val, label=y_val)
-    y_pred = model.predict(validation)
-    return mean_squared_error(y_pred, y_val, squared=False)
+def estimate_quality(model, X_test, y_test):
+    y_pred_gini = model.predict(X_test)
+    return mean_squared_error(y_test, y_pred_gini, squared=False)
 
 
 @flow(task_runner=SequentialTaskRunner())
@@ -67,7 +65,7 @@ def nyc_duration_flow():
     df = load_data('data/full_data.csv')
     X_train, X_val, y_train, y_val = generate_datasets(
         df).result()
-    model = train_model(X_train, y_train)
+    model = train_model(X_train, X_val, y_train, y_val)
     rmse = estimate_quality(model, X_val, y_val)
 
 
