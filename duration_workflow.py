@@ -19,6 +19,8 @@ def load_data(path):
     data = pd.read_csv(path)
     data['ever_married'] = [0 if i != 'Yes' else 1 for i in data['ever_married']]
     data['gender'] = [0 if i != 'Female' else 1 for i in data['gender']]
+    data = pd.get_dummies(
+        data, columns=['work_type', 'Residence_type', 'smoking_status'])
     return data
 
 
@@ -47,8 +49,9 @@ def train_model(X_train, y_train):
         "ccp_alpha": 0
     }
 
-    clf_gini = DecisionTreeClassifier(best_params)
+    clf_gini = DecisionTreeClassifier(**best_params)
     clf_gini.fit(X_train, y_train)
+    clf_gini
     return clf_gini
 
 
